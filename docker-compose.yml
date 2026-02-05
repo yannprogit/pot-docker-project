@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: pot-backend
+    expose:
+      - "3000"
+    networks:
+      - pot-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VUE_APP_API_BASE=/api
+    container_name: pot-frontend
+    expose:
+      - "80"
+    networks:
+      - pot-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+  gateway:
+    build:
+      context: ./gateway
+    container_name: pot-gateway
+    ports:
+      - "8081:8080"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - pot-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+networks:
+  pot-network:
+    driver: bridge
+    name: pot-network
